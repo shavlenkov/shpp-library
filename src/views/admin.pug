@@ -1,0 +1,115 @@
+doctype html
+html(lang='en')
+    head
+        meta(charset='UTF-8')
+        title Admin Panel
+        link(href='https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css', rel='stylesheet', integrity='sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC', crossorigin='anonymous')
+        style.
+            body {
+                overflow: hidden;
+            }
+            #test {
+                border: 5px solid black;
+                border-radius: 20px;
+            }
+
+    body
+        .container-fluid
+            h1 Библиотека++
+            .row
+                .col-lg-6
+                    table.table.table-hover
+                        thead
+                            tr
+                                th ID
+                                th Название
+                                th Автор
+                                th Год
+                                th Страниц
+                                th Обложка
+                                th Просмотров
+                                th Кликов
+                                th Действия
+                        each book in books
+                            tbody
+                                tr
+                                    td=book.ID
+                                    td=book.title
+                                    td=book.name
+                                    td=book.year
+                                    td=book.pages
+                                    td
+                                        img(src=book.cover, width=120, height=180)
+                                    td=book.views
+                                    td=book.clicks
+                                    td
+                                        button(onclick=`deleteBook(${book.ID})`).btn.btn-danger Удалить
+
+                .col-lg-6
+                    #test.row
+                        form.input-group.mb-3(action='/admin/books/create', method='post', enctype="multipart/form-data" )
+                            .col-lg-6
+                                input.form-control(name='title', type='text', placeholder='Название книги')
+                                br
+                                input.form-control(name='year', type='number', placeholder='Год создания книги')
+                                br
+                                input.form-control(name='pages', type='number', placeholder='Количество страниц книги')
+                                br
+                                input#img.form-control(type='file', name="avatar", accept='image/*')
+                                br
+                                img#img-preview(width='150', height='200', src='/images/defaultCover.jpeg')
+                                br
+                                br
+
+                                button(type='submit').btn.btn-success &Dcy;&ocy;&bcy;&acy;&vcy;&icy;&tcy;&softcy;
+
+                            .col-lg-6
+                                input.form-control(name='authors[]', type='text', placeholder='Автор 1')
+                                br
+
+                                input.form-control(name='authors[]', type='text', placeholder='Автор 2')
+                                br
+
+                                input.form-control(name='authors[]', type='text', placeholder='Автор 3')
+
+                                textarea(name='description' placeholder='description book')
+
+    nav(aria-label='...')
+        ul.pagination.pagination-lg
+            - for (var i = 1; i <= Math.ceil(booksLength / offset); i++)
+              li.page-item
+                a.page-link(href=`?pag=${i}`)=i
+
+
+
+    script(type='text/javascript', src='https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js')
+    script.
+        $('#img').change(function () {
+            var input = $(this)[0];
+            if (input.files && input.files[0]) {
+                if (input.files[0].type.match('image.*')) {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        $('#img-preview').attr('src', e.target.result);
+                    }
+                    reader.readAsDataURL(input.files[0]);
+                } else {
+                    console.log('ошибка, не изображение');
+                }
+            } else {
+                console.log('хьюстон у нас проблема');
+            }
+        });
+
+        function deleteBook(id) {
+            fetch(`http://localhost:3000/admin/books/${id}/delete`, {
+                method: 'DELETE',
+                headers: {'Content-Type': 'application/json'},
+            })
+                .then(res => {
+                    if (res.ok) return res.json()
+                })
+                .then(data => {
+                    window.location.reload()
+                })
+        }
